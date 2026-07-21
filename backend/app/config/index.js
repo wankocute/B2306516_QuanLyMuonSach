@@ -1,0 +1,14 @@
+const config = {
+  app: {
+    port: process.env.PORT || 3000,
+  },
+  db: {
+    uri: process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/quanlymuonsach",
+  },
+  jwt: {
+    secret: process.env.JWT_SECRET || "b2306516_quanlymuonsach_secret",
+    expiresIn: "1d",
+  },
+};
+
+module.exports = config;
