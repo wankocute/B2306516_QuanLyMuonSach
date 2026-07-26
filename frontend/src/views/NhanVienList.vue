@@ -1,49 +1,63 @@
 <template>
   <div>
-    <h3>Quản lý nhân viên</h3>
+    <div class="page-head">
+      <div>
+        <span class="eyebrow">Hệ thống</span>
+        <h3>Quản lý nhân viên</h3>
+      </div>
+    </div>
 
-    <p v-if="message" class="text-danger">{{ message }}</p>
+    <div v-if="message" class="msg msg-error">
+      <i class="fas fa-circle-exclamation"></i> {{ message }}
+    </div>
 
     <div class="row">
       <div class="col-md-8">
-        <table class="table table-bordered table-hover table-sm">
-          <thead class="thead-light">
-            <tr>
-              <th>MSNV</th>
-              <th>Họ tên</th>
-              <th>Chức vụ</th>
-              <th>Địa chỉ</th>
-              <th>Điện thoại</th>
-              <th style="width: 120px">Thao tác</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="nv in danhSach" :key="nv._id">
-              <td>{{ nv.MSNV }}</td>
-              <td>{{ nv.HoTenNV }}</td>
-              <td>{{ nv.ChucVu }}</td>
-              <td>{{ nv.DiaChi }}</td>
-              <td>{{ nv.SoDienThoai }}</td>
-              <td>
-                <button class="btn btn-sm btn-warning mr-1" @click="chon(nv)">
-                  Sửa
-                </button>
-                <button class="btn btn-sm btn-danger" @click="xoa(nv)">
-                  Xoá
-                </button>
-              </td>
-            </tr>
-            <tr v-if="danhSach.length === 0">
-              <td colspan="6" class="text-center">Không có nhân viên nào</td>
-            </tr>
-          </tbody>
-        </table>
+        <div class="table-wrap">
+          <table class="table table-hover table-sm">
+            <thead class="thead-light">
+              <tr>
+                <th>MSNV</th>
+                <th>Họ tên</th>
+                <th>Chức vụ</th>
+                <th>Địa chỉ</th>
+                <th>Điện thoại</th>
+                <th style="width: 120px">Thao tác</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="nv in danhSach" :key="nv._id">
+                <td>{{ nv.MSNV }}</td>
+                <td>{{ nv.HoTenNV }}</td>
+                <td>{{ nv.ChucVu }}</td>
+                <td>{{ nv.DiaChi }}</td>
+                <td>{{ nv.SoDienThoai }}</td>
+                <td>
+                  <button
+                    class="btn btn-sm btn-outline-primary mr-1"
+                    @click="chon(nv)"
+                  >
+                    Sửa
+                  </button>
+                  <button class="btn btn-sm btn-danger" @click="xoa(nv)">
+                    Xoá
+                  </button>
+                </td>
+              </tr>
+              <tr v-if="danhSach.length === 0" class="empty-state">
+                <td colspan="6">Không có nhân viên nào</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
 
       <div class="col-md-4">
         <div class="card">
           <div class="card-body">
-            <h5>{{ form._id ? "Cập nhật nhân viên" : "Thêm nhân viên mới" }}</h5>
+            <h5>
+              {{ form._id ? "Cập nhật nhân viên" : "Thêm nhân viên mới" }}
+            </h5>
             <NhanVienForm
               :key="form._id || 'moi'"
               :nhanVien="form"
@@ -60,6 +74,7 @@
 <script>
 import NhanVienService from "@/services/nhanvien.service";
 import NhanVienForm from "@/components/NhanVienForm.vue";
+import { thongBao, xacNhanXoa } from "@/utils/hoithoai";
 
 export default {
   components: {
@@ -108,6 +123,7 @@ export default {
         } else {
           await NhanVienService.create(data);
         }
+        thongBao(data._id ? "Đã cập nhật" : "Đã thêm mới");
         this.reset();
         this.load();
       } catch (error) {
@@ -115,9 +131,11 @@ export default {
       }
     },
     async xoa(nv) {
-      if (!confirm(`Xoá nhân viên ${nv.HoTenNV}?`)) return;
+      const dongY = await xacNhanXoa(`Xoá nhân viên ${nv.HoTenNV}?`);
+      if (!dongY) return;
       try {
         await NhanVienService.delete(nv._id);
+        thongBao("Đã xoá");
         this.load();
       } catch (error) {
         this.message = error.response?.data?.message || "Xoá thất bại";

@@ -1,61 +1,74 @@
 <template>
   <div>
-    <h3>Quản lý sách</h3>
+    <div class="page-head">
+      <div>
+        <span class="eyebrow">Danh mục</span>
+        <h3>Quản lý sách</h3>
+      </div>
+    </div>
 
-    <p v-if="message" class="text-danger">{{ message }}</p>
+    <div v-if="message" class="msg msg-error">
+      <i class="fas fa-circle-exclamation"></i> {{ message }}
+    </div>
 
     <div class="row">
       <div class="col-md-8">
-        <div class="input-group mb-2">
-          <input
-            v-model="keyword"
-            type="text"
-            class="form-control"
-            placeholder="Tìm theo tên sách hoặc tác giả"
-            @keyup.enter="load"
-          />
-          <div class="input-group-append">
-            <button class="btn btn-primary" @click="load">Tìm</button>
-            <button class="btn btn-secondary" @click="xoaTimKiem">Xoá lọc</button>
+        <div class="toolbar">
+          <div class="search-box">
+            <i class="fas fa-magnifying-glass"></i>
+            <input
+              v-model="keyword"
+              type="text"
+              class="form-control"
+              placeholder="Tìm theo tên sách hoặc tác giả"
+              @keyup.enter="load"
+            />
           </div>
+          <button class="btn btn-primary" @click="load">Tìm</button>
+          <button class="btn btn-secondary" @click="xoaTimKiem">Xoá lọc</button>
         </div>
 
-        <table class="table table-bordered table-hover table-sm">
-          <thead class="thead-light">
-            <tr>
-              <th>Mã</th>
-              <th>Tên sách</th>
-              <th>Tác giả</th>
-              <th>Đơn giá</th>
-              <th>Số quyển</th>
-              <th>Năm XB</th>
-              <th>NXB</th>
-              <th style="width: 120px">Thao tác</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="s in danhSach" :key="s._id">
-              <td>{{ s.MaSach }}</td>
-              <td>{{ s.TenSach }}</td>
-              <td>{{ s.TacGia }}</td>
-              <td>{{ s.DonGia }}</td>
-              <td>{{ s.SoQuyen }}</td>
-              <td>{{ s.NamXuatBan }}</td>
-              <td>{{ tenNXB(s.MaNXB) }}</td>
-              <td>
-                <button class="btn btn-sm btn-warning mr-1" @click="chon(s)">
-                  Sửa
-                </button>
-                <button class="btn btn-sm btn-danger" @click="xoa(s)">
-                  Xoá
-                </button>
-              </td>
-            </tr>
-            <tr v-if="danhSach.length === 0">
-              <td colspan="8" class="text-center">Không có sách nào</td>
-            </tr>
-          </tbody>
-        </table>
+        <div class="table-wrap">
+          <table class="table table-hover table-sm">
+            <thead class="thead-light">
+              <tr>
+                <th>Mã</th>
+                <th>Tên sách</th>
+                <th>Tác giả</th>
+                <th>Đơn giá</th>
+                <th>Số quyển</th>
+                <th>Năm XB</th>
+                <th>NXB</th>
+                <th style="width: 120px">Thao tác</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="s in danhSach" :key="s._id">
+                <td>{{ s.MaSach }}</td>
+                <td>{{ s.TenSach }}</td>
+                <td>{{ s.TacGia }}</td>
+                <td>{{ s.DonGia }}</td>
+                <td>{{ s.SoQuyen }}</td>
+                <td>{{ s.NamXuatBan }}</td>
+                <td>{{ tenNXB(s.MaNXB) }}</td>
+                <td>
+                  <button
+                    class="btn btn-sm btn-outline-primary mr-1"
+                    @click="chon(s)"
+                  >
+                    Sửa
+                  </button>
+                  <button class="btn btn-sm btn-danger" @click="xoa(s)">
+                    Xoá
+                  </button>
+                </td>
+              </tr>
+              <tr v-if="danhSach.length === 0" class="empty-state">
+                <td colspan="8">Không có sách nào</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
 
       <div class="col-md-4">
@@ -80,6 +93,7 @@
 import SachService from "@/services/sach.service";
 import NhaXuatBanService from "@/services/nhaxuatban.service";
 import SachForm from "@/components/SachForm.vue";
+import { thongBao, xacNhanXoa } from "@/utils/hoithoai";
 
 export default {
   components: {
@@ -147,6 +161,7 @@ export default {
         } else {
           await SachService.create(data);
         }
+        thongBao(data._id ? "Đã cập nhật" : "Đã thêm mới");
         this.reset();
         this.load();
       } catch (error) {
@@ -154,9 +169,11 @@ export default {
       }
     },
     async xoa(s) {
-      if (!confirm(`Xoá sách ${s.TenSach}?`)) return;
+      const dongY = await xacNhanXoa(`Xoá sách ${s.TenSach}?`);
+      if (!dongY) return;
       try {
         await SachService.delete(s._id);
+        thongBao("Đã xoá");
         this.load();
       } catch (error) {
         this.message = "Xoá thất bại";

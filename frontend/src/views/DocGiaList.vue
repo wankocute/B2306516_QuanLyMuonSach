@@ -1,61 +1,74 @@
 <template>
   <div>
-    <h3>Quản lý độc giả</h3>
+    <div class="page-head">
+      <div>
+        <span class="eyebrow">Danh mục</span>
+        <h3>Quản lý độc giả</h3>
+      </div>
+    </div>
 
-    <p v-if="message" class="text-danger">{{ message }}</p>
+    <div v-if="message" class="msg msg-error">
+      <i class="fas fa-circle-exclamation"></i> {{ message }}
+    </div>
 
     <div class="row">
       <div class="col-md-8">
-        <div class="input-group mb-2">
-          <input
-            v-model="keyword"
-            type="text"
-            class="form-control"
-            placeholder="Tìm theo tên hoặc số điện thoại"
-            @keyup.enter="load"
-          />
-          <div class="input-group-append">
-            <button class="btn btn-primary" @click="load">Tìm</button>
-            <button class="btn btn-secondary" @click="xoaTimKiem">Xoá lọc</button>
+        <div class="toolbar">
+          <div class="search-box">
+            <i class="fas fa-magnifying-glass"></i>
+            <input
+              v-model="keyword"
+              type="text"
+              class="form-control"
+              placeholder="Tìm theo tên hoặc số điện thoại"
+              @keyup.enter="load"
+            />
           </div>
+          <button class="btn btn-primary" @click="load">Tìm</button>
+          <button class="btn btn-secondary" @click="xoaTimKiem">Xoá lọc</button>
         </div>
 
-        <table class="table table-bordered table-hover table-sm">
-          <thead class="thead-light">
-            <tr>
-              <th>Mã ĐG</th>
-              <th>Họ lót</th>
-              <th>Tên</th>
-              <th>Ngày sinh</th>
-              <th>Phái</th>
-              <th>Địa chỉ</th>
-              <th>Điện thoại</th>
-              <th style="width: 120px">Thao tác</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="dg in danhSach" :key="dg._id">
-              <td>{{ dg.MaDocGia }}</td>
-              <td>{{ dg.HoLot }}</td>
-              <td>{{ dg.Ten }}</td>
-              <td>{{ dinhDangNgay(dg.NgaySinh) }}</td>
-              <td>{{ dg.Phai }}</td>
-              <td>{{ dg.DiaChi }}</td>
-              <td>{{ dg.DienThoai }}</td>
-              <td>
-                <button class="btn btn-sm btn-warning mr-1" @click="chon(dg)">
-                  Sửa
-                </button>
-                <button class="btn btn-sm btn-danger" @click="xoa(dg)">
-                  Xoá
-                </button>
-              </td>
-            </tr>
-            <tr v-if="danhSach.length === 0">
-              <td colspan="8" class="text-center">Không có độc giả nào</td>
-            </tr>
-          </tbody>
-        </table>
+        <div class="table-wrap">
+          <table class="table table-hover table-sm">
+            <thead class="thead-light">
+              <tr>
+                <th>Mã ĐG</th>
+                <th>Họ lót</th>
+                <th>Tên</th>
+                <th>Ngày sinh</th>
+                <th>Phái</th>
+                <th>Địa chỉ</th>
+                <th>Điện thoại</th>
+                <th style="width: 120px">Thao tác</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="dg in danhSach" :key="dg._id">
+                <td>{{ dg.MaDocGia }}</td>
+                <td>{{ dg.HoLot }}</td>
+                <td>{{ dg.Ten }}</td>
+                <td>{{ dinhDangNgay(dg.NgaySinh) }}</td>
+                <td>{{ dg.Phai }}</td>
+                <td>{{ dg.DiaChi }}</td>
+                <td>{{ dg.DienThoai }}</td>
+                <td>
+                  <button
+                    class="btn btn-sm btn-outline-primary mr-1"
+                    @click="chon(dg)"
+                  >
+                    Sửa
+                  </button>
+                  <button class="btn btn-sm btn-danger" @click="xoa(dg)">
+                    Xoá
+                  </button>
+                </td>
+              </tr>
+              <tr v-if="danhSach.length === 0" class="empty-state">
+                <td colspan="8">Không có độc giả nào</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
 
       <div class="col-md-4">
@@ -78,6 +91,7 @@
 <script>
 import DocGiaService from "@/services/docgia.service";
 import DocGiaForm from "@/components/DocGiaForm.vue";
+import { thongBao, xacNhanXoa } from "@/utils/hoithoai";
 
 export default {
   components: {
@@ -142,6 +156,7 @@ export default {
         } else {
           await DocGiaService.create(data);
         }
+        thongBao(data._id ? "Đã cập nhật" : "Đã thêm mới");
         this.reset();
         this.load();
       } catch (error) {
@@ -149,9 +164,11 @@ export default {
       }
     },
     async xoa(dg) {
-      if (!confirm(`Xoá độc giả ${dg.HoLot} ${dg.Ten}?`)) return;
+      const dongY = await xacNhanXoa(`Xoá độc giả ${dg.HoLot} ${dg.Ten}?`);
+      if (!dongY) return;
       try {
         await DocGiaService.delete(dg._id);
+        thongBao("Đã xoá");
         this.load();
       } catch (error) {
         this.message = "Xoá thất bại";

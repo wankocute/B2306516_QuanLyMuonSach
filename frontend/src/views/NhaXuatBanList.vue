@@ -1,39 +1,51 @@
 <template>
   <div>
-    <h3>Nhà xuất bản</h3>
+    <div class="page-head">
+      <div>
+        <span class="eyebrow">Danh mục</span>
+        <h3>Nhà xuất bản</h3>
+      </div>
+    </div>
 
-    <p v-if="message" class="text-danger">{{ message }}</p>
+    <div v-if="message" class="msg msg-error">
+      <i class="fas fa-circle-exclamation"></i> {{ message }}
+    </div>
 
     <div class="row">
       <div class="col-md-7">
-        <table class="table table-bordered table-hover">
-          <thead class="thead-light">
-            <tr>
-              <th>Mã NXB</th>
-              <th>Tên NXB</th>
-              <th>Địa chỉ</th>
-              <th style="width: 130px">Thao tác</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="nxb in danhSach" :key="nxb._id">
-              <td>{{ nxb.MaNXB }}</td>
-              <td>{{ nxb.TenNXB }}</td>
-              <td>{{ nxb.DiaChi }}</td>
-              <td>
-                <button class="btn btn-sm btn-warning mr-1" @click="chon(nxb)">
-                  Sửa
-                </button>
-                <button class="btn btn-sm btn-danger" @click="xoa(nxb)">
-                  Xoá
-                </button>
-              </td>
-            </tr>
-            <tr v-if="danhSach.length === 0">
-              <td colspan="4" class="text-center">Chưa có nhà xuất bản nào</td>
-            </tr>
-          </tbody>
-        </table>
+        <div class="table-wrap">
+          <table class="table table-hover">
+            <thead class="thead-light">
+              <tr>
+                <th>Mã NXB</th>
+                <th>Tên NXB</th>
+                <th>Địa chỉ</th>
+                <th style="width: 130px">Thao tác</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="nxb in danhSach" :key="nxb._id">
+                <td>{{ nxb.MaNXB }}</td>
+                <td>{{ nxb.TenNXB }}</td>
+                <td>{{ nxb.DiaChi }}</td>
+                <td>
+                  <button
+                    class="btn btn-sm btn-outline-primary mr-1"
+                    @click="chon(nxb)"
+                  >
+                    Sửa
+                  </button>
+                  <button class="btn btn-sm btn-danger" @click="xoa(nxb)">
+                    Xoá
+                  </button>
+                </td>
+              </tr>
+              <tr v-if="danhSach.length === 0" class="empty-state">
+                <td colspan="4">Chưa có nhà xuất bản nào</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
 
       <div class="col-md-5">
@@ -56,6 +68,7 @@
 <script>
 import NhaXuatBanService from "@/services/nhaxuatban.service";
 import NhaXuatBanForm from "@/components/NhaXuatBanForm.vue";
+import { thongBao, xacNhanXoa } from "@/utils/hoithoai";
 
 export default {
   components: {
@@ -97,6 +110,7 @@ export default {
         } else {
           await NhaXuatBanService.create(data);
         }
+        thongBao(data._id ? "Đã cập nhật" : "Đã thêm mới");
         this.reset();
         this.load();
       } catch (error) {
@@ -104,9 +118,11 @@ export default {
       }
     },
     async xoa(nxb) {
-      if (!confirm(`Xoá nhà xuất bản ${nxb.TenNXB}?`)) return;
+      const dongY = await xacNhanXoa(`Xoá nhà xuất bản ${nxb.TenNXB}?`);
+      if (!dongY) return;
       try {
         await NhaXuatBanService.delete(nxb._id);
+        thongBao("Đã xoá");
         this.load();
       } catch (error) {
         this.message = "Xoá thất bại";

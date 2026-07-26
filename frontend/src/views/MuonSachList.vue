@@ -1,10 +1,19 @@
 <template>
   <div>
-    <h3>Mượn / Trả sách</h3>
+    <div class="page-head">
+      <div>
+        <span class="eyebrow">Nghiệp vụ</span>
+        <h3>Mượn / Trả sách</h3>
+      </div>
+    </div>
 
-    <p v-if="message" :class="thanhCong ? 'text-success' : 'text-danger'">
+    <div v-if="message" class="msg" :class="thanhCong ? 'msg-ok' : 'msg-error'">
+      <i
+        class="fas"
+        :class="thanhCong ? 'fa-circle-check' : 'fa-circle-exclamation'"
+      ></i>
       {{ message }}
-    </p>
+    </div>
 
     <div class="card mb-3">
       <div class="card-body">
@@ -69,7 +78,9 @@
           <td>{{ dinhDangNgay(p.NgayHenTra) }}</td>
           <td>{{ dinhDangNgay(p.NgayTra) }}</td>
           <td>
-            <span class="badge" :class="lopBadge(p)">{{ nhanTrangThai(p) }}</span>
+            <span class="badge" :class="lopBadge(p)">{{
+              nhanTrangThai(p)
+            }}</span>
           </td>
           <td>
             <button
@@ -82,8 +93,8 @@
             <button class="btn btn-sm btn-danger" @click="xoa(p)">Xoá</button>
           </td>
         </tr>
-        <tr v-if="danhSach.length === 0">
-          <td colspan="7" class="text-center">Không có phiếu nào</td>
+        <tr v-if="danhSach.length === 0" class="empty-state">
+          <td colspan="7">Không có phiếu nào</td>
         </tr>
       </tbody>
     </table>
@@ -94,6 +105,7 @@
 import TheoDoiMuonSachService from "@/services/theodoimuonsach.service";
 import DocGiaService from "@/services/docgia.service";
 import SachService from "@/services/sach.service";
+import { xacNhan, xacNhanXoa } from "@/utils/hoithoai";
 
 export default {
   data() {
@@ -184,7 +196,11 @@ export default {
       }
     },
     async traSach(p) {
-      if (!confirm("Xác nhận trả sách?")) return;
+      const dongY = await xacNhan(
+        "Xác nhận trả sách",
+        `Độc giả đã trả cuốn "${this.tenSach(p.MaSach)}"?`,
+      );
+      if (!dongY) return;
       try {
         await TheoDoiMuonSachService.traSach(p._id);
         this.baoOk("Trả sách thành công");
@@ -195,7 +211,10 @@ export default {
       }
     },
     async xoa(p) {
-      if (!confirm("Xoá phiếu mượn này?")) return;
+      const dongY = await xacNhanXoa(
+        "Xoá phiếu mượn này? Thao tác không thể hoàn tác.",
+      );
+      if (!dongY) return;
       try {
         await TheoDoiMuonSachService.delete(p._id);
         this.load();
