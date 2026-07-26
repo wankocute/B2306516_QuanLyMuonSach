@@ -40,20 +40,12 @@
         <div class="card">
           <div class="card-body">
             <h5>{{ form._id ? "Cập nhật" : "Thêm mới" }}</h5>
-            <div class="form-group">
-              <label>Mã NXB</label>
-              <input v-model="form.MaNXB" type="text" class="form-control" />
-            </div>
-            <div class="form-group">
-              <label>Tên NXB</label>
-              <input v-model="form.TenNXB" type="text" class="form-control" />
-            </div>
-            <div class="form-group">
-              <label>Địa chỉ</label>
-              <input v-model="form.DiaChi" type="text" class="form-control" />
-            </div>
-            <button class="btn btn-primary mr-2" @click="luu">Lưu</button>
-            <button class="btn btn-secondary" @click="reset">Huỷ</button>
+            <NhaXuatBanForm
+              :key="form._id || 'moi'"
+              :nhaXuatBan="form"
+              @submit:nhaxuatban="luu"
+              @cancel="reset"
+            />
           </div>
         </div>
       </div>
@@ -63,12 +55,16 @@
 
 <script>
 import NhaXuatBanService from "@/services/nhaxuatban.service";
+import NhaXuatBanForm from "@/components/NhaXuatBanForm.vue";
 
 export default {
+  components: {
+    NhaXuatBanForm,
+  },
   data() {
     return {
       danhSach: [],
-      form: { MaNXB: "", TenNXB: "", DiaChi: "" },
+      form: this.formRong(),
       message: "",
     };
   },
@@ -76,6 +72,9 @@ export default {
     this.load();
   },
   methods: {
+    formRong() {
+      return { MaNXB: "", TenNXB: "", DiaChi: "" };
+    },
     async load() {
       try {
         this.danhSach = await NhaXuatBanService.getAll();
@@ -85,21 +84,18 @@ export default {
     },
     chon(nxb) {
       this.form = { ...nxb };
-    },
-    reset() {
-      this.form = { MaNXB: "", TenNXB: "", DiaChi: "" };
       this.message = "";
     },
-    async luu() {
-      if (!this.form.MaNXB || !this.form.TenNXB) {
-        this.message = "Phải nhập Mã NXB và Tên NXB";
-        return;
-      }
+    reset() {
+      this.form = this.formRong();
+      this.message = "";
+    },
+    async luu(data) {
       try {
-        if (this.form._id) {
-          await NhaXuatBanService.update(this.form._id, this.form);
+        if (data._id) {
+          await NhaXuatBanService.update(data._id, data);
         } else {
-          await NhaXuatBanService.create(this.form);
+          await NhaXuatBanService.create(data);
         }
         this.reset();
         this.load();

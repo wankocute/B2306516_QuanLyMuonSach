@@ -44,40 +44,12 @@
         <div class="card">
           <div class="card-body">
             <h5>{{ form._id ? "Cập nhật nhân viên" : "Thêm nhân viên mới" }}</h5>
-            <div class="form-group">
-              <label>MSNV</label>
-              <input v-model="form.MSNV" type="text" class="form-control" />
-            </div>
-            <div class="form-group">
-              <label>Họ tên</label>
-              <input v-model="form.HoTenNV" type="text" class="form-control" />
-            </div>
-            <div class="form-group">
-              <label>
-                Mật khẩu
-                <small v-if="form._id" class="text-muted">
-                  (bỏ trống nếu không đổi)
-                </small>
-              </label>
-              <input v-model="form.Password" type="password" class="form-control" />
-            </div>
-            <div class="form-group">
-              <label>Chức vụ</label>
-              <select v-model="form.ChucVu" class="form-control">
-                <option value="Nhân viên">Nhân viên</option>
-                <option value="Quản lý">Quản lý</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Địa chỉ</label>
-              <input v-model="form.DiaChi" type="text" class="form-control" />
-            </div>
-            <div class="form-group">
-              <label>Số điện thoại</label>
-              <input v-model="form.SoDienThoai" type="text" class="form-control" />
-            </div>
-            <button class="btn btn-primary mr-2" @click="luu">Lưu</button>
-            <button class="btn btn-secondary" @click="reset">Huỷ</button>
+            <NhanVienForm
+              :key="form._id || 'moi'"
+              :nhanVien="form"
+              @submit:nhanvien="luu"
+              @cancel="reset"
+            />
           </div>
         </div>
       </div>
@@ -87,8 +59,12 @@
 
 <script>
 import NhanVienService from "@/services/nhanvien.service";
+import NhanVienForm from "@/components/NhanVienForm.vue";
 
 export default {
+  components: {
+    NhanVienForm,
+  },
   data() {
     return {
       danhSach: [],
@@ -119,25 +95,14 @@ export default {
     },
     chon(nv) {
       this.form = { ...nv, Password: "" };
+      this.message = "";
     },
     reset() {
       this.form = this.formRong();
       this.message = "";
     },
-    async luu() {
-      if (!this.form.MSNV || !this.form.HoTenNV) {
-        this.message = "Phải nhập MSNV và Họ tên";
-        return;
-      }
-      if (!this.form._id && !this.form.Password) {
-        this.message = "Phải nhập mật khẩu cho nhân viên mới";
-        return;
-      }
+    async luu(data) {
       try {
-        const data = { ...this.form };
-        if (data._id && !data.Password) {
-          delete data.Password;
-        }
         if (data._id) {
           await NhanVienService.update(data._id, data);
         } else {

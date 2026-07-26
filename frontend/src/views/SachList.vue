@@ -62,41 +62,13 @@
         <div class="card">
           <div class="card-body">
             <h5>{{ form._id ? "Cập nhật sách" : "Thêm sách mới" }}</h5>
-            <div class="form-group">
-              <label>Mã sách</label>
-              <input v-model="form.MaSach" type="text" class="form-control" />
-            </div>
-            <div class="form-group">
-              <label>Tên sách</label>
-              <input v-model="form.TenSach" type="text" class="form-control" />
-            </div>
-            <div class="form-group">
-              <label>Tác giả</label>
-              <input v-model="form.TacGia" type="text" class="form-control" />
-            </div>
-            <div class="form-group">
-              <label>Đơn giá</label>
-              <input v-model.number="form.DonGia" type="number" class="form-control" />
-            </div>
-            <div class="form-group">
-              <label>Số quyển</label>
-              <input v-model.number="form.SoQuyen" type="number" class="form-control" />
-            </div>
-            <div class="form-group">
-              <label>Năm xuất bản</label>
-              <input v-model.number="form.NamXuatBan" type="number" class="form-control" />
-            </div>
-            <div class="form-group">
-              <label>Nhà xuất bản</label>
-              <select v-model="form.MaNXB" class="form-control">
-                <option value="">-- Chọn NXB --</option>
-                <option v-for="nxb in dsNXB" :key="nxb._id" :value="nxb.MaNXB">
-                  {{ nxb.TenNXB }}
-                </option>
-              </select>
-            </div>
-            <button class="btn btn-primary mr-2" @click="luu">Lưu</button>
-            <button class="btn btn-secondary" @click="reset">Huỷ</button>
+            <SachForm
+              :key="form._id || 'moi'"
+              :sach="form"
+              :dsNXB="dsNXB"
+              @submit:sach="luu"
+              @cancel="reset"
+            />
           </div>
         </div>
       </div>
@@ -107,8 +79,12 @@
 <script>
 import SachService from "@/services/sach.service";
 import NhaXuatBanService from "@/services/nhaxuatban.service";
+import SachForm from "@/components/SachForm.vue";
 
 export default {
+  components: {
+    SachForm,
+  },
   data() {
     return {
       danhSach: [],
@@ -158,21 +134,18 @@ export default {
     },
     chon(s) {
       this.form = { ...s };
+      this.message = "";
     },
     reset() {
       this.form = this.formRong();
       this.message = "";
     },
-    async luu() {
-      if (!this.form.MaSach || !this.form.TenSach) {
-        this.message = "Phải nhập Mã sách và Tên sách";
-        return;
-      }
+    async luu(data) {
       try {
-        if (this.form._id) {
-          await SachService.update(this.form._id, this.form);
+        if (data._id) {
+          await SachService.update(data._id, data);
         } else {
-          await SachService.create(this.form);
+          await SachService.create(data);
         }
         this.reset();
         this.load();

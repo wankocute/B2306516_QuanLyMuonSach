@@ -62,39 +62,12 @@
         <div class="card">
           <div class="card-body">
             <h5>{{ form._id ? "Cập nhật độc giả" : "Thêm độc giả mới" }}</h5>
-            <div class="form-group">
-              <label>Mã độc giả</label>
-              <input v-model="form.MaDocGia" type="text" class="form-control" />
-            </div>
-            <div class="form-group">
-              <label>Họ lót</label>
-              <input v-model="form.HoLot" type="text" class="form-control" />
-            </div>
-            <div class="form-group">
-              <label>Tên</label>
-              <input v-model="form.Ten" type="text" class="form-control" />
-            </div>
-            <div class="form-group">
-              <label>Ngày sinh</label>
-              <input v-model="form.NgaySinh" type="date" class="form-control" />
-            </div>
-            <div class="form-group">
-              <label>Phái</label>
-              <select v-model="form.Phai" class="form-control">
-                <option value="Nam">Nam</option>
-                <option value="Nu">Nữ</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Địa chỉ</label>
-              <input v-model="form.DiaChi" type="text" class="form-control" />
-            </div>
-            <div class="form-group">
-              <label>Điện thoại</label>
-              <input v-model="form.DienThoai" type="text" class="form-control" />
-            </div>
-            <button class="btn btn-primary mr-2" @click="luu">Lưu</button>
-            <button class="btn btn-secondary" @click="reset">Huỷ</button>
+            <DocGiaForm
+              :key="form._id || 'moi'"
+              :docGia="form"
+              @submit:docgia="luu"
+              @cancel="reset"
+            />
           </div>
         </div>
       </div>
@@ -104,8 +77,12 @@
 
 <script>
 import DocGiaService from "@/services/docgia.service";
+import DocGiaForm from "@/components/DocGiaForm.vue";
 
 export default {
+  components: {
+    DocGiaForm,
+  },
   data() {
     return {
       danhSach: [],
@@ -152,21 +129,18 @@ export default {
           .toISOString()
           .slice(0, 10);
       }
+      this.message = "";
     },
     reset() {
       this.form = this.formRong();
       this.message = "";
     },
-    async luu() {
-      if (!this.form.MaDocGia || !this.form.Ten) {
-        this.message = "Phải nhập Mã độc giả và Tên";
-        return;
-      }
+    async luu(data) {
       try {
-        if (this.form._id) {
-          await DocGiaService.update(this.form._id, this.form);
+        if (data._id) {
+          await DocGiaService.update(data._id, data);
         } else {
-          await DocGiaService.create(this.form);
+          await DocGiaService.create(data);
         }
         this.reset();
         this.load();
