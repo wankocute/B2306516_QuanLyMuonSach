@@ -119,7 +119,6 @@ import DocGiaService from "@/services/docgia.service";
 import SachService from "@/services/sach.service";
 import { xacNhan, xacNhanXoa } from "@/utils/hoithoai";
 
-// Doi Date sang chuoi yyyy-MM-dd theo gio may (khong dung toISOString vi bi lech mui gio)
 function chuoiNgay(d) {
   const thang = String(d.getMonth() + 1).padStart(2, "0");
   const ngay = String(d.getDate()).padStart(2, "0");
@@ -145,6 +144,7 @@ export default {
         { value: "", text: "Tất cả" },
         { value: "dangmuon", text: "Đang mượn" },
         { value: "datra", text: "Đã trả" },
+        { value: "quahan", text: "Quá hạn" },
       ],
       message: "",
       thanhCong: false,
