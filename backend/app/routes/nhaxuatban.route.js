@@ -1,7 +1,10 @@
 const express = require("express");
 const nhaXuatBan = require("../controllers/nhaxuatban.controller");
+const { verifyToken } = require("../middlewares/auth.middleware");
 
 const router = express.Router();
+
+router.use(verifyToken);
 
 router
   .route("/")
