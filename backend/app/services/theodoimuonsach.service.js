@@ -68,16 +68,15 @@ class TheoDoiMuonSachService {
     if (payload.NgayHenTra) {
       ngayHenTra = new Date(payload.NgayHenTra);
       if (isNaN(ngayHenTra.getTime())) {
-        return { error: "Ngay hen tra khong hop le" };
+        return { error: "Ngày hẹn trả không hợp lệ" };
       }
-      // Lay cuoi ngay de phieu khong bi tinh qua han ngay trong ngay hen tra
       ngayHenTra.setHours(23, 59, 59, 999);
     } else {
       ngayHenTra = new Date(ngayMuon.getTime() + 7 * 24 * 60 * 60 * 1000);
     }
 
     if (ngayHenTra < ngayMuon) {
-      return { error: "Ngay hen tra phai sau ngay muon" };
+      return { error: "Ngày hẹn trả phải sau ngày mượn" };
     }
 
     const phieu = {
