@@ -5,6 +5,10 @@
         <span class="eyebrow">Hệ thống</span>
         <h3>Quản lý nhân viên</h3>
       </div>
+
+      <button class="btn btn-primary" @click="themMoi">
+        <i class="fas fa-plus"></i> Thêm mới
+      </button>
     </div>
 
     <div v-if="message" class="msg msg-error">
@@ -12,7 +16,7 @@
     </div>
 
     <div class="row">
-      <div class="col-md-8">
+      <div :class="hienForm ? 'col-md-8' : 'col-12'">
         <div class="table-wrap">
           <table class="table table-hover table-sm">
             <thead class="thead-light">
@@ -20,7 +24,7 @@
                 <th>MSNV</th>
                 <th>Họ tên</th>
                 <th>Chức vụ</th>
-                <th>Địa chỉ</th>
+                <th class="cell-wide">Địa chỉ</th>
                 <th>Điện thoại</th>
                 <th style="width: 120px">Thao tác</th>
               </tr>
@@ -30,7 +34,7 @@
                 <td>{{ nv.MSNV }}</td>
                 <td>{{ nv.HoTenNV }}</td>
                 <td>{{ nv.ChucVu }}</td>
-                <td>{{ nv.DiaChi }}</td>
+                <td class="cell-wide">{{ nv.DiaChi }}</td>
                 <td>{{ nv.SoDienThoai }}</td>
                 <td>
                   <button
@@ -52,7 +56,7 @@
         </div>
       </div>
 
-      <div class="col-md-4">
+      <div v-if="hienForm" class="col-md-4">
         <div class="card">
           <div class="card-body">
             <h5>
@@ -84,6 +88,7 @@ export default {
     return {
       danhSach: [],
       form: this.formRong(),
+      hienForm: false,
       message: "",
     };
   },
@@ -110,10 +115,17 @@ export default {
     },
     chon(nv) {
       this.form = { ...nv, Password: "" };
+      this.hienForm = true;
+      this.message = "";
+    },
+    themMoi() {
+      this.form = this.formRong();
+      this.hienForm = true;
       this.message = "";
     },
     reset() {
       this.form = this.formRong();
+      this.hienForm = false;
       this.message = "";
     },
     async luu(data) {

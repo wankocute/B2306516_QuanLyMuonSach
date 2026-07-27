@@ -41,34 +41,51 @@ class TheoDoiMuonSachService {
 
     const docGia = await this.DocGia.findOne({ MaDocGia: MaDocGia });
     if (!docGia) {
-      return { error: "Khong tim thay doc gia" };
+      return { error: "Không tìm thấy độc giả" };
     }
 
     const sach = await this.Sach.findOne({ MaSach: MaSach });
     if (!sach) {
-      return { error: "Khong tim thay sach" };
+      return { error: "Không tìm thấy sách" };
     }
 
     if (sach.SoQuyen <= 0) {
-      return { error: "Sach da het, khong the muon" };
+      return { error: "Sách đã hết, không thể mượn" };
     }
 
     const daMuon = await this.daMuonCuonNay(MaDocGia, MaSach);
     if (daMuon) {
-      return { error: "Doc gia dang muon cuon nay, chua tra" };
+      return { error: "Độc giả đang mượn cuốn này, chưa trả" };
     }
 
     const soDangMuon = await this.countDangMuon(MaDocGia);
     if (soDangMuon >= GIOI_HAN_MUON) {
-      return { error: `Doc gia da muon toi da ${GIOI_HAN_MUON} cuon` };
+      return { error: `Độc giả đã mượn tối đa ${GIOI_HAN_MUON} cuốn` };
+    }
+
+    const ngayMuon = new Date();
+    let ngayHenTra;
+    if (payload.NgayHenTra) {
+      ngayHenTra = new Date(payload.NgayHenTra);
+      if (isNaN(ngayHenTra.getTime())) {
+        return { error: "Ngay hen tra khong hop le" };
+      }
+      // Lay cuoi ngay de phieu khong bi tinh qua han ngay trong ngay hen tra
+      ngayHenTra.setHours(23, 59, 59, 999);
+    } else {
+      ngayHenTra = new Date(ngayMuon.getTime() + 7 * 24 * 60 * 60 * 1000);
+    }
+
+    if (ngayHenTra < ngayMuon) {
+      return { error: "Ngay hen tra phai sau ngay muon" };
     }
 
     const phieu = {
       MaDocGia: MaDocGia,
       MaSach: MaSach,
-      NgayMuon: new Date(),
+      NgayMuon: ngayMuon,
       NgayTra: null,
-      NgayHenTra: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      NgayHenTra: ngayHenTra,
       MSNV_Lap: payload.MSNV_Lap || null,
     };
 
@@ -81,10 +98,10 @@ class TheoDoiMuonSachService {
   async traSach(id) {
     const phieu = await this.findById(id);
     if (!phieu) {
-      return { error: "Khong tim thay phieu muon" };
+      return { error: "Không tìm thấy phiếu mượn" };
     }
     if (phieu.NgayTra) {
-      return { error: "Phieu nay da tra sach roi" };
+      return { error: "Phiếu này đã trả sách rồi" };
     }
 
     await this.TheoDoi.updateOne(
@@ -96,7 +113,7 @@ class TheoDoiMuonSachService {
       { $inc: { SoQuyen: 1 } }
     );
 
-    return { data: { message: "Tra sach thanh cong" } };
+    return { data: { message: "Trả sách thành công" } };
   }
 
   async delete(id) {

@@ -5,6 +5,10 @@
         <span class="eyebrow">Danh mục</span>
         <h3>Nhà xuất bản</h3>
       </div>
+
+      <button class="btn btn-primary" @click="themMoi">
+        <i class="fas fa-plus"></i> Thêm mới
+      </button>
     </div>
 
     <div v-if="message" class="msg msg-error">
@@ -12,22 +16,22 @@
     </div>
 
     <div class="row">
-      <div class="col-md-7">
+      <div :class="hienForm ? 'col-md-7' : 'col-12'">
         <div class="table-wrap">
           <table class="table table-hover">
             <thead class="thead-light">
               <tr>
                 <th>Mã NXB</th>
-                <th>Tên NXB</th>
-                <th>Địa chỉ</th>
+                <th class="cell-wrap">Tên NXB</th>
+                <th class="cell-wide">Địa chỉ</th>
                 <th style="width: 130px">Thao tác</th>
               </tr>
             </thead>
             <tbody>
               <tr v-for="nxb in danhSach" :key="nxb._id">
                 <td>{{ nxb.MaNXB }}</td>
-                <td>{{ nxb.TenNXB }}</td>
-                <td>{{ nxb.DiaChi }}</td>
+                <td class="cell-wrap">{{ nxb.TenNXB }}</td>
+                <td class="cell-wide">{{ nxb.DiaChi }}</td>
                 <td>
                   <button
                     class="btn btn-sm btn-outline-primary mr-1"
@@ -48,7 +52,7 @@
         </div>
       </div>
 
-      <div class="col-md-5">
+      <div v-if="hienForm" class="col-md-5">
         <div class="card">
           <div class="card-body">
             <h5>{{ form._id ? "Cập nhật" : "Thêm mới" }}</h5>
@@ -78,6 +82,7 @@ export default {
     return {
       danhSach: [],
       form: this.formRong(),
+      hienForm: false,
       message: "",
     };
   },
@@ -97,10 +102,17 @@ export default {
     },
     chon(nxb) {
       this.form = { ...nxb };
+      this.hienForm = true;
+      this.message = "";
+    },
+    themMoi() {
+      this.form = this.formRong();
+      this.hienForm = true;
       this.message = "";
     },
     reset() {
       this.form = this.formRong();
+      this.hienForm = false;
       this.message = "";
     },
     async luu(data) {

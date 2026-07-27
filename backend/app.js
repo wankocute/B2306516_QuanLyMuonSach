@@ -22,7 +22,7 @@ app.get("/", (req, res) => {
 });
 
 app.use((req, res, next) => {
-  next(new ApiError(404, "Resource not found"));
+  next(new ApiError(404, "Không tìm thấy tài nguyên"));
 });
 
 app.use((err, req, res, next) => {

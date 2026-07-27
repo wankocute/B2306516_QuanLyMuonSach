@@ -5,6 +5,10 @@
         <span class="eyebrow">Danh mục</span>
         <h3>Quản lý sách</h3>
       </div>
+
+      <button class="btn btn-primary" @click="themMoi">
+        <i class="fas fa-plus"></i> Thêm mới
+      </button>
     </div>
 
     <div v-if="message" class="msg msg-error">
@@ -12,7 +16,7 @@
     </div>
 
     <div class="row">
-      <div class="col-md-8">
+      <div :class="hienForm ? 'col-md-8' : 'col-12'">
         <div class="toolbar">
           <div class="search-box">
             <i class="fas fa-magnifying-glass"></i>
@@ -33,24 +37,24 @@
             <thead class="thead-light">
               <tr>
                 <th>Mã</th>
-                <th>Tên sách</th>
+                <th class="cell-wrap">Tên sách</th>
                 <th>Tác giả</th>
                 <th>Đơn giá</th>
                 <th>Số quyển</th>
                 <th>Năm XB</th>
-                <th>NXB</th>
+                <th class="cell-wrap">NXB</th>
                 <th style="width: 120px">Thao tác</th>
               </tr>
             </thead>
             <tbody>
               <tr v-for="s in danhSach" :key="s._id">
                 <td>{{ s.MaSach }}</td>
-                <td>{{ s.TenSach }}</td>
+                <td class="cell-wrap">{{ s.TenSach }}</td>
                 <td>{{ s.TacGia }}</td>
                 <td>{{ s.DonGia }}</td>
                 <td>{{ s.SoQuyen }}</td>
                 <td>{{ s.NamXuatBan }}</td>
-                <td>{{ tenNXB(s.MaNXB) }}</td>
+                <td class="cell-wrap">{{ tenNXB(s.MaNXB) }}</td>
                 <td>
                   <button
                     class="btn btn-sm btn-outline-primary mr-1"
@@ -71,7 +75,7 @@
         </div>
       </div>
 
-      <div class="col-md-4">
+      <div v-if="hienForm" class="col-md-4">
         <div class="card">
           <div class="card-body">
             <h5>{{ form._id ? "Cập nhật sách" : "Thêm sách mới" }}</h5>
@@ -105,6 +109,7 @@ export default {
       dsNXB: [],
       keyword: "",
       form: this.formRong(),
+      hienForm: false,
       message: "",
     };
   },
@@ -148,10 +153,17 @@ export default {
     },
     chon(s) {
       this.form = { ...s };
+      this.hienForm = true;
+      this.message = "";
+    },
+    themMoi() {
+      this.form = this.formRong();
+      this.hienForm = true;
       this.message = "";
     },
     reset() {
       this.form = this.formRong();
+      this.hienForm = false;
       this.message = "";
     },
     async luu(data) {

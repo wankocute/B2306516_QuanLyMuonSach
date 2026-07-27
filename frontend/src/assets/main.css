@@ -258,7 +258,7 @@ a:hover {
   border: 1px solid var(--line);
   border-radius: var(--radius);
   box-shadow: var(--shadow-sm);
-  overflow: hidden;
+  overflow-x: auto;
 }
 
 .table-wrap .table {
@@ -619,4 +619,24 @@ select.form-control:not([size]):not([multiple]) {
   font-size: 0.875rem;
   font-weight: 500;
   margin: 0;
+}
+
+/* ---------- Bề rộng cột bảng ---------- */
+
+/* Mặc định không cho chữ trong ô xuống dòng, tránh ô bị bóp thành cột dọc */
+.table th,
+.table td {
+  white-space: nowrap;
+}
+
+/* Ô nội dung dài (tên sách, tên NXB) thì cho xuống dòng */
+.table .cell-wrap {
+  white-space: normal;
+  min-width: 180px;
+}
+
+/* Ô địa chỉ cần rộng hơn nữa */
+.table .cell-wide {
+  white-space: normal;
+  min-width: 280px;
 }

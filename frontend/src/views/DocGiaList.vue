@@ -5,6 +5,10 @@
         <span class="eyebrow">Danh mục</span>
         <h3>Quản lý độc giả</h3>
       </div>
+
+      <button class="btn btn-primary" @click="themMoi">
+        <i class="fas fa-plus"></i> Thêm mới
+      </button>
     </div>
 
     <div v-if="message" class="msg msg-error">
@@ -12,7 +16,7 @@
     </div>
 
     <div class="row">
-      <div class="col-md-8">
+      <div :class="hienForm ? 'col-md-8' : 'col-12'">
         <div class="toolbar">
           <div class="search-box">
             <i class="fas fa-magnifying-glass"></i>
@@ -37,7 +41,7 @@
                 <th>Tên</th>
                 <th>Ngày sinh</th>
                 <th>Phái</th>
-                <th>Địa chỉ</th>
+                <th class="cell-wide">Địa chỉ</th>
                 <th>Điện thoại</th>
                 <th style="width: 120px">Thao tác</th>
               </tr>
@@ -49,7 +53,7 @@
                 <td>{{ dg.Ten }}</td>
                 <td>{{ dinhDangNgay(dg.NgaySinh) }}</td>
                 <td>{{ dg.Phai }}</td>
-                <td>{{ dg.DiaChi }}</td>
+                <td class="cell-wide">{{ dg.DiaChi }}</td>
                 <td>{{ dg.DienThoai }}</td>
                 <td>
                   <button
@@ -71,7 +75,7 @@
         </div>
       </div>
 
-      <div class="col-md-4">
+      <div v-if="hienForm" class="col-md-4">
         <div class="card">
           <div class="card-body">
             <h5>{{ form._id ? "Cập nhật độc giả" : "Thêm độc giả mới" }}</h5>
@@ -102,6 +106,7 @@ export default {
       danhSach: [],
       keyword: "",
       form: this.formRong(),
+      hienForm: false,
       message: "",
     };
   },
@@ -137,6 +142,7 @@ export default {
     },
     chon(dg) {
       this.form = { ...dg };
+      this.hienForm = true;
       // input type=date chỉ nhận chuỗi yyyy-MM-dd
       if (this.form.NgaySinh) {
         this.form.NgaySinh = new Date(this.form.NgaySinh)
@@ -145,8 +151,14 @@ export default {
       }
       this.message = "";
     },
+    themMoi() {
+      this.form = this.formRong();
+      this.hienForm = true;
+      this.message = "";
+    },
     reset() {
       this.form = this.formRong();
+      this.hienForm = false;
       this.message = "";
     },
     async luu(data) {

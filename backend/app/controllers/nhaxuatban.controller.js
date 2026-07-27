@@ -4,14 +4,14 @@ const ApiError = require("../api-error");
 
 exports.create = async (req, res, next) => {
   if (!req.body?.TenNXB) {
-    return next(new ApiError(400, "TenNXB khong duoc de trong"));
+    return next(new ApiError(400, "Tên nhà xuất bản không được để trống"));
   }
   try {
     const nhaXuatBanService = new NhaXuatBanService(MongoDB.client);
     const document = await nhaXuatBanService.create(req.body);
     return res.send(document);
   } catch (error) {
-    return next(new ApiError(500, "Loi khi them nha xuat ban"));
+    return next(new ApiError(500, "Lỗi khi thêm nhà xuất bản"));
   }
 };
 
@@ -26,7 +26,7 @@ exports.findAll = async (req, res, next) => {
       documents = await nhaXuatBanService.find({});
     }
   } catch (error) {
-    return next(new ApiError(500, "Loi khi lay danh sach nha xuat ban"));
+    return next(new ApiError(500, "Lỗi khi lấy danh sách nhà xuất bản"));
   }
   return res.send(documents);
 };
@@ -36,30 +36,30 @@ exports.findOne = async (req, res, next) => {
     const nhaXuatBanService = new NhaXuatBanService(MongoDB.client);
     const document = await nhaXuatBanService.findById(req.params.id);
     if (!document) {
-      return next(new ApiError(404, "Khong tim thay nha xuat ban"));
+      return next(new ApiError(404, "Không tìm thấy nhà xuất bản"));
     }
     return res.send(document);
   } catch (error) {
     return next(
-      new ApiError(500, `Loi khi lay nha xuat ban id=${req.params.id}`)
+      new ApiError(500, `Lỗi khi lấy nhà xuất bản id=${req.params.id}`)
     );
   }
 };
 
 exports.update = async (req, res, next) => {
   if (Object.keys(req.body).length === 0) {
-    return next(new ApiError(400, "Du lieu cap nhat khong duoc rong"));
+    return next(new ApiError(400, "Dữ liệu cập nhật không được rỗng"));
   }
   try {
     const nhaXuatBanService = new NhaXuatBanService(MongoDB.client);
     const document = await nhaXuatBanService.update(req.params.id, req.body);
     if (!document) {
-      return next(new ApiError(404, "Khong tim thay nha xuat ban"));
+      return next(new ApiError(404, "Không tìm thấy nhà xuất bản"));
     }
-    return res.send({ message: "Cap nhat thanh cong" });
+    return res.send({ message: "Cập nhật thành công" });
   } catch (error) {
     return next(
-      new ApiError(500, `Loi khi cap nhat nha xuat ban id=${req.params.id}`)
+      new ApiError(500, `Lỗi khi cập nhật nhà xuất bản id=${req.params.id}`)
     );
   }
 };
@@ -69,12 +69,12 @@ exports.delete = async (req, res, next) => {
     const nhaXuatBanService = new NhaXuatBanService(MongoDB.client);
     const document = await nhaXuatBanService.delete(req.params.id);
     if (!document) {
-      return next(new ApiError(404, "Khong tim thay nha xuat ban"));
+      return next(new ApiError(404, "Không tìm thấy nhà xuất bản"));
     }
-    return res.send({ message: "Xoa thanh cong" });
+    return res.send({ message: "Xoá thành công" });
   } catch (error) {
     return next(
-      new ApiError(500, `Loi khi xoa nha xuat ban id=${req.params.id}`)
+      new ApiError(500, `Lỗi khi xoá nhà xuất bản id=${req.params.id}`)
     );
   }
 };
@@ -85,6 +85,6 @@ exports.deleteAll = async (req, res, next) => {
     const deletedCount = await nhaXuatBanService.deleteAll();
     return res.send({ message: `Da xoa ${deletedCount} nha xuat ban` });
   } catch (error) {
-    return next(new ApiError(500, "Loi khi xoa tat ca nha xuat ban"));
+    return next(new ApiError(500, "Lỗi khi xoá tất cả nhà xuất bản"));
   }
 };

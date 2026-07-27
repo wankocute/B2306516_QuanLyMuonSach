@@ -28,7 +28,7 @@
               </option>
             </select>
           </div>
-          <div class="col-md-5">
+          <div class="col-md-4">
             <label>Sách</label>
             <select v-model="form.MaSach" class="form-control">
               <option value="">-- Chọn sách --</option>
@@ -37,9 +37,18 @@
               </option>
             </select>
           </div>
-          <div class="col-md-3">
+          <div class="col-md-2">
+            <label>Ngày hẹn trả</label>
+            <input
+              v-model="form.NgayHenTra"
+              type="date"
+              class="form-control"
+              :min="homNay"
+            />
+          </div>
+          <div class="col-md-2">
             <button class="btn btn-primary btn-block" @click="muonSach">
-              Lập phiếu mượn
+              Lập phiếu
             </button>
           </div>
         </div>
@@ -67,7 +76,7 @@
           <th>Hẹn trả</th>
           <th>Ngày trả</th>
           <th>Trạng thái</th>
-          <th style="width: 140px">Thao tác</th>
+          <th style="width: 200px">Thao tác</th>
         </tr>
       </thead>
       <tbody>
@@ -88,8 +97,11 @@
               class="btn btn-sm btn-success mr-1"
               @click="traSach(p)"
             >
-              Trả sách
+              <i class="fas fa-check"></i> Xác nhận trả
             </button>
+            <span v-else class="text-muted mr-2">
+              <i class="fas fa-circle-check"></i> Đã trả
+            </span>
             <button class="btn btn-sm btn-danger" @click="xoa(p)">Xoá</button>
           </td>
         </tr>
@@ -107,13 +119,27 @@ import DocGiaService from "@/services/docgia.service";
 import SachService from "@/services/sach.service";
 import { xacNhan, xacNhanXoa } from "@/utils/hoithoai";
 
+// Doi Date sang chuoi yyyy-MM-dd theo gio may (khong dung toISOString vi bi lech mui gio)
+function chuoiNgay(d) {
+  const thang = String(d.getMonth() + 1).padStart(2, "0");
+  const ngay = String(d.getDate()).padStart(2, "0");
+  return `${d.getFullYear()}-${thang}-${ngay}`;
+}
+
+function ngaySauHomNay(soNgay) {
+  const d = new Date();
+  d.setDate(d.getDate() + soNgay);
+  return chuoiNgay(d);
+}
+
 export default {
   data() {
     return {
       danhSach: [],
       dsDocGia: [],
       dsSach: [],
-      form: { MaDocGia: "", MaSach: "" },
+      form: { MaDocGia: "", MaSach: "", NgayHenTra: ngaySauHomNay(7) },
+      homNay: chuoiNgay(new Date()),
       trangThai: "",
       boLoc: [
         { value: "", text: "Tất cả" },
@@ -185,9 +211,17 @@ export default {
         this.baoLoi("Phải chọn độc giả và sách");
         return;
       }
+      if (!this.form.NgayHenTra) {
+        this.baoLoi("Phải chọn ngày hẹn trả");
+        return;
+      }
+      if (this.form.NgayHenTra < this.homNay) {
+        this.baoLoi("Ngày hẹn trả không được nhỏ hơn ngày hôm nay");
+        return;
+      }
       try {
         await TheoDoiMuonSachService.muonSach(this.form);
-        this.form = { MaDocGia: "", MaSach: "" };
+        this.form = { MaDocGia: "", MaSach: "", NgayHenTra: ngaySauHomNay(7) };
         this.baoOk("Lập phiếu mượn thành công");
         this.load();
         this.loadDanhMuc();
