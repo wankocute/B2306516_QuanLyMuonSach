@@ -3,11 +3,18 @@ const MongoDB = require("../utils/mongodb.util");
 const ApiError = require("../api-error");
 
 exports.create = async (req, res, next) => {
+  if (!req.body?.MaDocGia) {
+    return next(new ApiError(400, "Mã độc giả không được để trống"));
+  }
   if (!req.body?.Ten) {
     return next(new ApiError(400, "Tên không được để trống"));
   }
   try {
     const docGiaService = new DocGiaService(MongoDB.client);
+    const daCo = await docGiaService.find({ MaDocGia: req.body.MaDocGia });
+    if (daCo.length > 0) {
+      return next(new ApiError(400, "Mã độc giả đã tồn tại"));
+    }
     const document = await docGiaService.create(req.body);
     return res.send(document);
   } catch (error) {
@@ -79,7 +86,7 @@ exports.deleteAll = async (req, res, next) => {
   try {
     const docGiaService = new DocGiaService(MongoDB.client);
     const deletedCount = await docGiaService.deleteAll();
-    return res.send({ message: `Da xoa ${deletedCount} doc gia` });
+    return res.send({ message: `Đã xoá ${deletedCount} độc giả` });
   } catch (error) {
     return next(new ApiError(500, "Lỗi khi xoá tất cả độc giả"));
   }

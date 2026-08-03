@@ -83,7 +83,7 @@ async function run() {
   await db.collection("docgia").deleteMany({});
   await db.collection("nhanvien").deleteMany({});
   await db.collection("theodoimuonsach").deleteMany({});
-  console.log("Da xoa du lieu cu");
+  console.log("Đã xoá dữ liệu cũ");
 
   await db.collection("nhaxuatban").insertMany(dsNXB);
 

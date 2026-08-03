@@ -116,9 +116,20 @@ class TheoDoiMuonSachService {
   }
 
   async delete(id) {
-    return await this.TheoDoi.findOneAndDelete({
-      _id: ObjectId.isValid(id) ? new ObjectId(id) : null,
-    });
+    const phieu = await this.findById(id);
+    if (!phieu) {
+      return null;
+    }
+    await this.TheoDoi.deleteOne({ _id: phieu._id });
+
+    // Phiếu chưa trả thì sách vẫn đang bị trừ trong kho, xoá phiếu phải cộng lại
+    if (!phieu.NgayTra) {
+      await this.Sach.updateOne(
+        { MaSach: phieu.MaSach },
+        { $inc: { SoQuyen: 1 } }
+      );
+    }
+    return phieu;
   }
 }
 

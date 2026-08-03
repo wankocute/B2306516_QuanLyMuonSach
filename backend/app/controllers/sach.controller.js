@@ -3,11 +3,18 @@ const MongoDB = require("../utils/mongodb.util");
 const ApiError = require("../api-error");
 
 exports.create = async (req, res, next) => {
+  if (!req.body?.MaSach) {
+    return next(new ApiError(400, "Mã sách không được để trống"));
+  }
   if (!req.body?.TenSach) {
     return next(new ApiError(400, "Tên sách không được để trống"));
   }
   try {
     const sachService = new SachService(MongoDB.client);
+    const daCo = await sachService.find({ MaSach: req.body.MaSach });
+    if (daCo.length > 0) {
+      return next(new ApiError(400, "Mã sách đã tồn tại"));
+    }
     const document = await sachService.create(req.body);
     return res.send(document);
   } catch (error) {
@@ -79,7 +86,7 @@ exports.deleteAll = async (req, res, next) => {
   try {
     const sachService = new SachService(MongoDB.client);
     const deletedCount = await sachService.deleteAll();
-    return res.send({ message: `Da xoa ${deletedCount} sach` });
+    return res.send({ message: `Đã xoá ${deletedCount} sách` });
   } catch (error) {
     return next(new ApiError(500, "Lỗi khi xoá tất cả sách"));
   }

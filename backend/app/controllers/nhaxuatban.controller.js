@@ -3,11 +3,18 @@ const MongoDB = require("../utils/mongodb.util");
 const ApiError = require("../api-error");
 
 exports.create = async (req, res, next) => {
+  if (!req.body?.MaNXB) {
+    return next(new ApiError(400, "Mã nhà xuất bản không được để trống"));
+  }
   if (!req.body?.TenNXB) {
     return next(new ApiError(400, "Tên nhà xuất bản không được để trống"));
   }
   try {
     const nhaXuatBanService = new NhaXuatBanService(MongoDB.client);
+    const daCo = await nhaXuatBanService.find({ MaNXB: req.body.MaNXB });
+    if (daCo.length > 0) {
+      return next(new ApiError(400, "Mã nhà xuất bản đã tồn tại"));
+    }
     const document = await nhaXuatBanService.create(req.body);
     return res.send(document);
   } catch (error) {
@@ -83,7 +90,7 @@ exports.deleteAll = async (req, res, next) => {
   try {
     const nhaXuatBanService = new NhaXuatBanService(MongoDB.client);
     const deletedCount = await nhaXuatBanService.deleteAll();
-    return res.send({ message: `Da xoa ${deletedCount} nha xuat ban` });
+    return res.send({ message: `Đã xoá ${deletedCount} nhà xuất bản` });
   } catch (error) {
     return next(new ApiError(500, "Lỗi khi xoá tất cả nhà xuất bản"));
   }
